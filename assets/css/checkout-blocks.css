@@ -1,0 +1,484 @@
+/**
+ * Simple CSS for AP NMI Checkout Blocks Payment Form
+ */
+
+/* Button container dimensions (CollectJS removed style config support) */
+#nmi-apple-pay-button-blocks {
+    width: 100%;
+    height: 44px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#nmi-google-pay-button-blocks {
+    width: 100%;
+    height: 44px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* While Google has not yet said whether Google Pay works here, the block is already
+   in the layout (same height as the real button) so nothing below it jumps. */
+.nmi-google-pay-wrap.is-pending #nmi-google-pay-button-blocks {
+    background: #eceff3;
+    animation: ap-nmi-skeleton 1.2s ease-in-out infinite;
+}
+
+@keyframes ap-nmi-skeleton {
+    50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nmi-google-pay-wrap.is-pending #nmi-google-pay-button-blocks {
+        animation: none;
+    }
+}
+
+/* The Collect.js iframes arrive after load, so the box has one fixed height (44px:
+   42px field + 1px border each side) that is reserved up front and never depends on
+   what the iframe reports. The iframe simply fills it. */
+.ap-nmi-card-fields #ap-nmi-card-number,
+.ap-nmi-card-fields #ap-nmi-expiry-date,
+.ap-nmi-card-fields #ap-nmi-card-cvv {
+    height: 44px;
+    min-height: 44px;
+}
+
+.ap-nmi-card-fields #ap-nmi-card-number iframe,
+.ap-nmi-card-fields #ap-nmi-expiry-date iframe,
+.ap-nmi-card-fields #ap-nmi-card-cvv iframe {
+    height: 100% !important;
+    min-height: 0 !important;
+}
+
+.ap-nmi-payment-form {
+    padding: 16px 0;
+}
+
+.ap-nmi-field {
+    margin-bottom: 16px;
+}
+
+.ap-nmi-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.ap-nmi-field input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.ap-nmi-field input:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 1px #0073aa;
+}
+
+.ap-nmi-field input.error {
+    border-color: #dc3232;
+}
+
+.ap-nmi-field input.error:focus {
+    border-color: #dc3232;
+    box-shadow: 0 0 0 1px #dc3232;
+}
+
+.error-message {
+    display: block;
+    color: #dc3232;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.ap-nmi-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.ap-nmi-half {
+    flex: 1 1 0;
+    /* A flex item never shrinks below its content's width by default. The Collect.js
+       iframes have a fixed intrinsic width, so without this the expiry/CVV boxes grew
+       past their half of the row and had their right borders clipped. */
+    min-width: 0;
+}
+
+/* Keep the Collect.js inline fields (and their iframes) inside their container so the
+   whole border, including the right edge, is visible. */
+#ap-nmi-card-number,
+#ap-nmi-expiry-date,
+#ap-nmi-card-cvv {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* The visible border lives here, not inside the Collect.js iframe (see the
+       customCss note in checkout-blocks.js), so it can never be clipped. */
+    background: #fff;
+    border: 1px solid #c9ced6;
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#ap-nmi-card-number:hover,
+#ap-nmi-expiry-date:hover,
+#ap-nmi-card-cvv:hover {
+    border-color: #9aa3b2;
+}
+
+#ap-nmi-card-number.is-valid,
+#ap-nmi-expiry-date.is-valid,
+#ap-nmi-card-cvv.is-valid {
+    border-color: #2ecc71;
+}
+
+#ap-nmi-card-number.is-invalid,
+#ap-nmi-expiry-date.is-invalid,
+#ap-nmi-card-cvv.is-invalid {
+    border-color: #dc3232;
+}
+
+/* Focus ring last so it wins while the shopper is typing. :focus-within matches
+   when the iframe inside the container has focus. */
+#ap-nmi-card-number:focus-within,
+#ap-nmi-expiry-date:focus-within,
+#ap-nmi-card-cvv:focus-within {
+    border-color: #4681f4;
+    box-shadow: 0 0 0 3px rgba(70, 129, 244, 0.18);
+}
+
+#ap-nmi-card-number.is-invalid:focus-within,
+#ap-nmi-expiry-date.is-invalid:focus-within,
+#ap-nmi-card-cvv.is-invalid:focus-within {
+    border-color: #dc3232;
+    box-shadow: 0 0 0 3px rgba(220, 50, 50, 0.16);
+}
+
+#ap-nmi-card-number iframe,
+#ap-nmi-expiry-date iframe,
+#ap-nmi-card-cvv iframe {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive card-field layout (block checkout)
+ *   Desktop  (>= 1025px): card number, expiry and CVV on ONE line
+ *   Tablet   (601-1024px): card number on line 1, expiry + CVV on line 2
+ *   Mobile   (<= 600px):   one field per line, each full width
+ * The wrapper (.ap-nmi-card-fields) is a grid; .ap-nmi-row is flattened with
+ * display: contents so expiry and CVV become grid cells of the same grid.
+ * ------------------------------------------------------------------ */
+.ap-nmi-card-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: start;
+}
+
+/* Everything that is not a card field (brand icons, test notice, save-card checkbox)
+   spans the full width. */
+.ap-nmi-card-fields > * {
+    grid-column: 1 / -1;
+}
+
+.ap-nmi-card-fields > .ap-nmi-field-number {
+    grid-column: auto;
+}
+
+.ap-nmi-card-fields > .ap-nmi-row {
+    display: contents;
+}
+
+/* WooCommerce's .form-row-first / .form-row-last add floats and 47% widths that
+   would fight the grid. */
+.ap-nmi-card-fields .ap-nmi-field,
+.ap-nmi-card-fields .ap-nmi-half {
+    float: none !important;
+    width: auto !important;
+    min-width: 0;
+    margin-right: 0;
+    margin-left: 0;
+    margin-bottom: 16px;
+}
+
+/* Tablet: card number alone on the first line, expiry + CVV share the second. */
+@media (max-width: 1024px) {
+    .ap-nmi-card-fields {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .ap-nmi-card-fields > .ap-nmi-field-number {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Mobile: one field per line, full width. */
+@media (max-width: 600px) {
+    .ap-nmi-card-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ap-nmi-card-fields > .ap-nmi-field-number {
+        grid-column: 1 / -1;
+    }
+}
+
+.ap-nmi-test-notice {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-top: 16px;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .ap-nmi-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .ap-nmi-half {
+        margin-bottom: 16px;
+    }
+    
+    .ap-nmi-half:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* Ensure proper spacing in checkout blocks */
+.wc-block-checkout__payment-method .ap-nmi-payment-form {
+    margin-top: 16px;
+}
+
+/* Style the payment method label */
+.wc-block-components-payment-method-label .ap-nmi-payment-method-label {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Loading state styling */
+.ap-nmi-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.ap-nmi-loading input {
+    background-color: #f5f5f5;
+}
+
+/**
+ * Card Type Restriction Styles
+ */
+
+/* Card type error styling */
+.ap-nmi-card-type-error {
+    margin: 10px 0 !important;
+    padding: 12px 15px !important;
+    background: #e74c3c !important;
+    color: white !important;
+    border-radius: 4px !important;
+    border-left: 4px solid #c0392b !important;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Card type icon container */
+.ap-nmi-card-icons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    align-items: center;
+}
+
+.ap-nmi-card-icons .card-icon {
+    width: 32px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f9f9f9;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.ap-nmi-card-icons .card-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.ap-nmi-card-icons .card-icon.allowed {
+    opacity: 1;
+    background: #fff;
+    border-color: #007cba;
+    color: #007cba;
+}
+
+.ap-nmi-card-icons .card-icon.restricted {
+    opacity: 0.3;
+    background: #f8f8f8;
+    border-color: #ccc;
+    color: #999;
+    position: relative;
+}
+
+.ap-nmi-card-icons .card-icon.restricted::after {
+    content: '✕';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    font-size: 8px;
+    color: #e74c3c;
+    background: white;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e74c3c;
+}
+
+/* Live card-type highlighting: once Collect.js's BIN lookup identifies a brand
+ * from the digits typed so far (see lookUpCallback in checkout-blocks.js), every
+ * icon but the matching one fades out. Resets back to the plain allowed/restricted
+ * view above when the card number field empties. */
+.ap-nmi-card-icons.has-active .card-icon {
+    opacity: 0.2;
+}
+
+.ap-nmi-card-icons.has-active .card-icon.active {
+    opacity: 1;
+    border-color: #007cba;
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.4);
+}
+
+.ap-nmi-card-icons.has-active .card-icon.active.restricted {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.4);
+}
+
+/* Card type detection indicator */
+.ap-nmi-card-field.detected-visa { border-left: 3px solid #1a1f71; }
+.ap-nmi-card-field.detected-mastercard { border-left: 3px solid #eb001b; }
+.ap-nmi-card-field.detected-amex { border-left: 3px solid #006fcf; }
+.ap-nmi-card-field.detected-discover { border-left: 3px solid #ff6000; }
+.ap-nmi-card-field.detected-diners { border-left: 3px solid #0079be; }
+.ap-nmi-card-field.detected-jcb { border-left: 3px solid #35519c; }
+.ap-nmi-card-field.detected-unionpay { border-left: 3px solid #e21836; }
+
+/* Disabled state for submit button when card is restricted */
+#place_order.disabled {
+    background-color: #ccc !important;
+    border-color: #ccc !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Card restriction info text */
+.ap-nmi-card-restrictions-info {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Hide the checkmark SVG in save payment checkbox */
+.ap-nmi-save-payment-checkbox svg {
+    display: none !important;
+}
+
+.ap-nmi-save-payment-checkbox .components-checkbox-control__input-container {
+    margin-right: 8px;
+}
+
+/**
+ * 3D Secure Mount Point
+ * Reserve space only once the 3DS interface has actually mounted content
+ * (an iframe, etc.) into #threeDSMountPoint - otherwise it stays collapsed.
+ */
+#threeDSMountPoint {
+    max-width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#threeDSMountPoint:not(:empty) {
+    margin-top: 15px;
+    min-height: 100px !important;
+}
+
+#threeDSMountPoint iframe {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    min-height: 100px !important;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    #threeDSMountPoint:not(:empty) {
+        min-height: 350px;
+        margin-top: 10px;
+    }
+
+    #threeDSMountPoint iframe {
+        min-height: 350px;
+    }
+}
+
+@media (max-width: 480px) {
+    #threeDSMountPoint:not(:empty) {
+        min-height: 300px;
+        margin-top: 8px;
+    }
+
+    #threeDSMountPoint iframe {
+        min-height: 300px;
+    }
+}
+
+/* Responsive design for card icons */
+@media (max-width: 768px) {
+    .ap-nmi-card-icons {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .ap-nmi-card-icons .card-icon {
+        width: 28px;
+        height: 18px;
+        font-size: 9px;
+    }
+}
+
+/* Hide the checkmark SVG in save payment checkbox */
+.ap-nmi-save-payment-checkbox svg {
+    display: none !important;
+}
+
+.ap-nmi-save-payment-checkbox .components-checkbox-control__input-container {
+    margin-right: 8px;
+}

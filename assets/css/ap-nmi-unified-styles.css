@@ -1,0 +1,424 @@
+/* ── Wallet express buttons (Apple Pay + Google Pay, above payment methods) ── */
+
+.nmi-wallet-express-wrap {
+    margin-bottom: 20px;
+}
+
+.nmi-wallet-button {
+    margin-bottom: 8px;
+}
+
+/* Individual button containers: take up no space until CollectJS injects the iframe */
+.nmi-wallet-button:empty {
+    display: none;
+    margin-bottom: 0;
+}
+
+/* Button container dimensions (CollectJS removed style config support) */
+#nmi-apple-pay-express,
+#nmi-apple-pay-button {
+    width: 100%;
+    height: 44px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#nmi-google-pay-express,
+#nmi-google-pay-button {
+    width: 100%;
+    height: 44px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.nmi-or-divider {
+    text-align: center;
+    margin: 8px 0 0;
+    color: #999;
+    font-size: 13px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────── */
+
+.ap-nmi-collectjs-container{
+    margin-bottom: 15px;
+}
+
+/* Fields loading indicator */
+.ap-nmi-fields-loader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0 14px;
+    color: #767676;
+    font-size: 13px;
+}
+
+.ap-nmi-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ccc;
+    border-top-color: #555;
+    border-radius: 50%;
+    animation: ap-nmi-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes ap-nmi-spin {
+    to { transform: rotate(360deg); }
+}
+
+.ap-nmi-collectjs-container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e1e1e1;
+    border-radius: 3px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+/* Card Processing Fee row in the classic checkout's order review: many themes right-align
+ * the amount for Subtotal / Shipping / Total by row class but have no rule for the "fee"
+ * row, so the fee amount drifted to the middle of the row. */
+.woocommerce-checkout-review-order-table tfoot tr.fee td,
+.cart_totals table tr.fee td {
+    text-align: right;
+}
+
+/* ── Legacy checkout card fields: same design as the Blocks checkout ─────────
+ * Collect.js copies the page's input styles (including width and borders) into its
+ * iframes, which clipped the borders. The visible border is therefore drawn on the
+ * container here, and the iframe's own input is made borderless via customCss in
+ * ap-nmi-unified-integration.js. Everything is scoped to the legacy markup. */
+
+fieldset.ap-nmi-payment-form {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.ap-nmi-collectjs-container {
+    container-type: inline-size;
+    container-name: apnmi-card;
+}
+
+.ap-nmi-legacy-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    align-items: start;
+}
+
+/* Beat the theme's float/width rules for .form-row. */
+.ap-nmi-legacy-fields > .form-row {
+    float: none !important;
+    clear: none !important;
+    width: auto !important;
+    min-width: 0;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+}
+
+.ap-nmi-legacy-fields > .ap-nmi-legacy-number {
+    grid-column: 1 / -1;
+}
+
+.ap-nmi-legacy-fields label {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+/* One fixed height, reserved up front, so the fields never make the page jump. */
+.ap-nmi-legacy-fields #ap-nmi-card-number,
+.ap-nmi-legacy-fields #ap-nmi-expiry-date,
+.ap-nmi-legacy-fields #ap-nmi-card-cvv {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    height: 44px;
+    min-height: 44px;
+    background: #fff;
+    border: 1px solid #c9ced6;
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ap-nmi-legacy-fields #ap-nmi-card-number:hover,
+.ap-nmi-legacy-fields #ap-nmi-expiry-date:hover,
+.ap-nmi-legacy-fields #ap-nmi-card-cvv:hover {
+    border-color: #9aa3b2;
+}
+
+.ap-nmi-legacy-fields #ap-nmi-card-number.is-valid,
+.ap-nmi-legacy-fields #ap-nmi-expiry-date.is-valid,
+.ap-nmi-legacy-fields #ap-nmi-card-cvv.is-valid {
+    border-color: #2ecc71;
+}
+
+.ap-nmi-legacy-fields #ap-nmi-card-number.is-invalid,
+.ap-nmi-legacy-fields #ap-nmi-expiry-date.is-invalid,
+.ap-nmi-legacy-fields #ap-nmi-card-cvv.is-invalid {
+    border-color: #dc3232;
+}
+
+.ap-nmi-legacy-fields #ap-nmi-card-number:focus-within,
+.ap-nmi-legacy-fields #ap-nmi-expiry-date:focus-within,
+.ap-nmi-legacy-fields #ap-nmi-card-cvv:focus-within {
+    border-color: #4681f4;
+    box-shadow: 0 0 0 3px rgba(70, 129, 244, 0.18);
+}
+
+.ap-nmi-legacy-fields #ap-nmi-card-number.is-invalid:focus-within,
+.ap-nmi-legacy-fields #ap-nmi-expiry-date.is-invalid:focus-within,
+.ap-nmi-legacy-fields #ap-nmi-card-cvv.is-invalid:focus-within {
+    border-color: #dc3232;
+    box-shadow: 0 0 0 3px rgba(220, 50, 50, 0.18);
+}
+
+.ap-nmi-legacy-fields #ap-nmi-card-number iframe,
+.ap-nmi-legacy-fields #ap-nmi-expiry-date iframe,
+.ap-nmi-legacy-fields #ap-nmi-card-cvv iframe {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 0;
+    box-sizing: border-box;
+}
+
+/* Wide payment box: all three fields on one line. */
+@container apnmi-card (min-width: 560px) {
+    .ap-nmi-legacy-fields {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .ap-nmi-legacy-fields > .ap-nmi-legacy-number {
+        grid-column: auto;
+    }
+}
+
+/* Narrow payment box (phones): one field per line, full width. */
+@container apnmi-card (max-width: 340px) {
+    .ap-nmi-legacy-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.ap-nmi-collectjs-container input:focus {
+    outline: none;
+    border-color: #4681f4;
+}
+
+/**
+ * Card Type Restriction Styles
+ */
+
+/* Card type error styling */
+.ap-nmi-card-type-error {
+    margin: 10px 0 !important;
+    padding: 12px 15px !important;
+    background: #e74c3c !important;
+    color: white !important;
+    border-radius: 4px !important;
+    border-left: 4px solid #c0392b !important;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Card type icon container */
+.ap-nmi-card-icons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    align-items: center;
+}
+
+.ap-nmi-card-icons .card-icon {
+    width: 32px;
+    height: 20px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f9f9f9;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.ap-nmi-card-icons .card-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.ap-nmi-card-icons .card-icon.allowed {
+    opacity: 1;
+    background: #fff;
+    border-color: #007cba;
+    color: #007cba;
+}
+
+.ap-nmi-card-icons .card-icon.restricted {
+    opacity: 0.3;
+    background: #f8f8f8;
+    border-color: #ccc;
+    color: #999;
+    position: relative;
+}
+
+.ap-nmi-card-icons .card-icon.restricted::after {
+    content: '✕';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    font-size: 8px;
+    color: #e74c3c;
+    background: white;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e74c3c;
+}
+
+/* Live card-type highlighting: once Collect.js's BIN lookup identifies a brand
+ * from the digits typed so far (see lookUpCallback in ap-nmi-unified-integration.js
+ * and checkout-blocks.js), every icon but the matching one fades out. Resets back
+ * to the plain allowed/restricted view above when the card number field empties. */
+.ap-nmi-card-icons.has-active .card-icon {
+    opacity: 0.2;
+}
+
+.ap-nmi-card-icons.has-active .card-icon.active {
+    opacity: 1;
+    border-color: #007cba;
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.4);
+}
+
+.ap-nmi-card-icons.has-active .card-icon.active.restricted {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.4);
+}
+
+/* Card type detection indicator */
+.ap-nmi-card-field.detected-visa { border-left: 3px solid #1a1f71; }
+.ap-nmi-card-field.detected-mastercard { border-left: 3px solid #eb001b; }
+.ap-nmi-card-field.detected-amex { border-left: 3px solid #006fcf; }
+.ap-nmi-card-field.detected-discover { border-left: 3px solid #ff6000; }
+.ap-nmi-card-field.detected-diners { border-left: 3px solid #0079be; }
+.ap-nmi-card-field.detected-jcb { border-left: 3px solid #35519c; }
+.ap-nmi-card-field.detected-unionpay { border-left: 3px solid #e21836; }
+
+/* Disabled state for submit button when card is restricted */
+#place_order.disabled {
+    background-color: #ccc !important;
+    border-color: #ccc !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Card restriction info text */
+.ap-nmi-card-restrictions-info {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* Responsive design for card icons */
+@media (max-width: 768px) {
+    .ap-nmi-card-icons {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .ap-nmi-card-icons .card-icon {
+        width: 28px;
+        height: 18px;
+        font-size: 9px;
+    }
+}
+
+/**
+ * 3D Secure Mount Point Styles
+ * Mobile-responsive styles for inline 3DS authentication
+ */
+
+#threeDSMountPoint {
+    max-width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Reserve space only once the 3DS interface has actually mounted content (an iframe, etc.) */
+#threeDSMountPoint:not(:empty) {
+    margin-top: 15px;
+    min-height: 100px !important;
+}
+
+#threeDSMountPoint iframe {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    min-height: 100px !important;
+    border: none;
+}
+
+#threeDSMessage {
+    display: none;
+    padding: 10px 15px;
+    background: #f0f0f0;
+    margin-top: 10px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    #threeDSMountPoint:not(:empty) {
+        min-height: 350px;
+        margin-top: 10px;
+    }
+
+    #threeDSMountPoint iframe {
+        min-height: 350px;
+    }
+
+    #threeDSMessage {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    #threeDSMountPoint:not(:empty) {
+        min-height: 300px;
+        margin-top: 8px;
+    }
+
+    #threeDSMountPoint iframe {
+        min-height: 300px;
+    }
+
+    #threeDSMessage {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}

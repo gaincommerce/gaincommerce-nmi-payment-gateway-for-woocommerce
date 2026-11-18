@@ -1,0 +1,36 @@
+.apnmi-review-notice .apnmi-review-actions .button-link {
+    margin-left: 8px;
+    color: #646970;
+}
+
+.apnmi-review-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-left: 4px solid #3858e9;
+    border-radius: 2px;
+    box-sizing: border-box;
+    margin: 16px 0;
+    max-width: 640px;
+    padding: 4px 16px;
+}
+
+.apnmi-setup-card {
+    border-left-color: #00a32a;
+}
+
+.apnmi-review-card [hidden] {
+    display: none !important;
+}
+
+.apnmi-review-card .apnmi-review-actions .button {
+    margin-right: 6px;
+}
+
+.apnmi-review-card .apnmi-review-hide {
+    margin-top: 0;
+}
+
+.apnmi-review-card .apnmi-review-hide .button-link {
+    color: #646970;
+    font-size: 12px;
+}

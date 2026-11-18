@@ -1,0 +1,69 @@
+.apnmi-ac {
+	position: absolute;
+	z-index: 100000;
+	box-sizing: border-box;
+	background: #fff;
+	border: 1px solid #c9ced6;
+	border-radius: 3px;
+	box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12);
+	font-size: 14px;
+	line-height: 1.4;
+	color: #1f2937;
+	overflow: hidden;
+}
+
+.apnmi-ac[hidden] {
+	display: none;
+}
+
+.apnmi-ac__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	max-height: 260px;
+	overflow-y: auto;
+}
+
+.apnmi-ac__item {
+	margin: 0;
+	padding: 10px 12px;
+	cursor: pointer;
+	border-bottom: 1px solid #eef0f3;
+}
+
+.apnmi-ac__item:last-child {
+	border-bottom: 0;
+}
+
+.apnmi-ac__item strong {
+	font-weight: 600;
+}
+
+.apnmi-ac__item span {
+	color: #6b7280;
+}
+
+.apnmi-ac__item.is-active {
+	background: #eef3ff;
+}
+
+.apnmi-ac__attribution {
+	padding: 5px 12px;
+	font-size: 11px;
+	text-align: right;
+	color: #6b7280;
+	background: #fafbfc;
+	border-top: 1px solid #eef0f3;
+}
+
+.apnmi-ac__status {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
