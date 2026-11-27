@@ -106,7 +106,18 @@ class Gateway extends WC_Payment_Gateway
 
     public function init_form_fields(): void
     {
+        // Section headings ('title' fields) are display only: WooCommerce does not save them. Each one starts a
+        // card (see Settings\Settings_Style) so the settings of one feature sit together in a block of their own.
+        $card = \APNMIPaymentGateway\Settings\Settings_Style::FREE_CLASS;
+
         $this->form_fields = [
+            'section_general' => [
+                'title'       => __('General', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+                'type'        => 'title',
+                'class'       => $card,
+                'default'     => '',
+                'description' => __('Turn the gateway on and choose what customers see for it at checkout.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+            ],
             'enabled' => [
                 'title' => __('Enable/Disable', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
                 'type' => 'checkbox',
@@ -134,6 +145,13 @@ class Gateway extends WC_Payment_Gateway
                 ),
                 'default' => __('Pay securely using your credit card.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
                 'desc_tip' => false,
+            ],
+            'section_environment' => [
+                'title'       => __('Environment & API Keys', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+                'type'        => 'title',
+                'class'       => $card,
+                'default'     => '',
+                'description' => __('Choose Live, Test or Sandbox and connect your NMI account with its keys.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
             ],
             'environment' => [
                 'title' => __('Environment', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
@@ -202,6 +220,13 @@ class Gateway extends WC_Payment_Gateway
                 'desc_tip' => false,
                 'class' => 'apnmi-sandbox-field',
             ],
+            'section_processing' => [
+                'title'       => __('Payment Processing', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+                'type'        => 'title',
+                'class'       => $card,
+                'default'     => '',
+                'description' => __('How payments are taken: sale or authorize first, receipts, and which cards are accepted.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+            ],
             'transaction_mode' => [
                 'title' => __('Transaction Mode', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
                 'type' => 'select',
@@ -255,6 +280,13 @@ class Gateway extends WC_Payment_Gateway
                 'custom_attributes' => [
                     'multiple' => 'multiple',
                 ],
+            ],
+            'section_bot_protection' => [
+                'title'       => __('Bot Protection', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+                'type'        => 'title',
+                'class'       => $card,
+                'default'     => '',
+                'description' => __('Block automated card-testing attempts at checkout.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
             ],
             'bot_protection_provider' => [
                 'title' => __('Bot Protection', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
@@ -311,6 +343,13 @@ class Gateway extends WC_Payment_Gateway
                 'desc_tip' => false,
                 'class' => 'apnmi-bot-protection-field apnmi-bot-protection-field--turnstile',
             ],
+            'section_descriptor' => [
+                'title'       => __('Billing Descriptor', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+                'type'        => 'title',
+                'class'       => $card,
+                'default'     => '',
+                'description' => __('The business name and phone number that appear on your customers\' card statements.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+            ],
             'enable_descriptor' => [
                 'title' => __('Enable Billing Descriptor', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
                 'label' => __('Enable custom billing descriptor', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
@@ -346,6 +385,13 @@ class Gateway extends WC_Payment_Gateway
                 ),
                 'default' => '',
                 'desc_tip' => false,
+            ],
+            'section_developer' => [
+                'title'       => __('Developer Tools', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
+                'type'        => 'title',
+                'class'       => $card,
+                'default'     => '',
+                'description' => __('Logging, the checkout debug console and the admin bar shortcut.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
             ],
             'logging' => [
                 'title' => __('Logging', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
@@ -666,7 +712,11 @@ class Gateway extends WC_Payment_Gateway
         // already rejected earlier by validate_fields(); this is the only
         // enforcement point blocks checkout ever reaches, since it skips
         // validate_fields() entirely (see is_blocks_checkout() branching above).
-        if (!\APNMIPaymentGateway\Bot_Protection::is_session_verified()) {
+        // Express wallet payments (Apple Pay / Google Pay on the cart and product pages, from the
+        // Enterprise add-on) are authenticated on the shopper's own device, so they can opt out here.
+        $bypass_bot_protection = (bool) apply_filters('apnmi_bypass_bot_protection', false, $order);
+
+        if (!$bypass_bot_protection && !\APNMIPaymentGateway\Bot_Protection::is_session_verified()) {
             \APNMIPaymentGateway\Checkout_Trace::server('process_payment:bot_protection_failed', ['order_id' => $order_id], 'warning');
             wc_add_notice(__('We could not verify this request as coming from a human. Please refresh the page and try again.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'), 'error');
             return ['result' => 'fail'];
@@ -1057,6 +1107,15 @@ class Gateway extends WC_Payment_Gateway
                 'response_code' => $nmi_response_code,
                 'response' => $response,
             ]);
+
+            /**
+             * Fires when NMI declines a card payment, before the order is marked failed.
+             *
+             * @param \WC_Order  $order             The order.
+             * @param array      $response          The standardised gateway response.
+             * @param string|int $nmi_response_code NMI's numeric response code, when there is one.
+             */
+            do_action('apnmi_payment_declined', $order, is_array($response) ? $response : [], $nmi_response_code);
 
             // Blocks (REST) shows the exception thrown below. A session notice on top of it is
             // never cleared by WooCommerce and reappears on the next page load, with whatever

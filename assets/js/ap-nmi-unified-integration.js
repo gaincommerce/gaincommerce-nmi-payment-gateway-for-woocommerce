@@ -508,7 +508,7 @@ jQuery(document).ready(function($) {
             lookUpCallback: function (response) {
                 nmiHighlightCardIcon(response && response.type);
             },
-            timeoutDuration: 10000,
+            timeoutDuration: 30000,
             timeoutCallback: function () {
                 // console.error, not console.log: this is a real checkout failure and
                 // must be visible when the console is filtered to errors.

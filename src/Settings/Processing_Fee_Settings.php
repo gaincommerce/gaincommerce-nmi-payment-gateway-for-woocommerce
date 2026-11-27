@@ -84,6 +84,7 @@ class Processing_Fee_Settings
         $fields['processing_fee_section'] = [
             'title'       => __( 'Credit Card Surcharge', 'gaincommerce-nmi-payment-gateway-for-woocommerce' ),
             'type'        => 'title',
+            'class'       => \APNMIPaymentGateway\Settings\Settings_Style::FREE_CLASS,
             'default'     => '',
             'description' => __(
                 'Add an extra fee to credit card orders at checkout. Automatically excluded for ACH, eCheck, and COD payment methods.',

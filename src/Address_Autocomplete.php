@@ -50,6 +50,7 @@ class Address_Autocomplete
         $fields['address_autocomplete_section'] = [
             'title'       => __( 'Address Autocomplete', 'gaincommerce-nmi-payment-gateway-for-woocommerce' ),
             'type'        => 'title',
+            'class'       => \APNMIPaymentGateway\Settings\Settings_Style::FREE_CLASS,
             'default'     => '',
             'description' => __(
                 'Suggests full addresses while customers type in the checkout address fields, which reduces typos and AVS mismatches. Uses your own Google Places API key, so Google bills your Google Cloud account directly. Turn this off if your theme or another plugin already provides address autocomplete, otherwise customers may see two suggestion lists.',

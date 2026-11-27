@@ -35,6 +35,7 @@ class Decline_Messages
         $fields['decline_messages_section'] = [
             'title'       => __('Decline Messages', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
             'type'        => 'title',
+            'class'       => \APNMIPaymentGateway\Settings\Settings_Style::FREE_CLASS,
             'default'     => '',
             'description' => __('What customers see when a card payment is declined. NMI\'s original text and code are always kept in the order note.', 'gaincommerce-nmi-payment-gateway-for-woocommerce'),
         ];

@@ -405,15 +405,15 @@ const CreditCardForm = ({ billing, eventRegistration, emitResponse }) => {
                     window.NMI_Debug.addSystemInfo('Card Fields Mounted', 'YES');
                 }
             },
-            // CollectJS's own timer. It is shorter than the 15s watchdog on the
+            // CollectJS's own timer. It is shorter than the 35s watchdog on the
             // tokenization promise below, so it always fires first — it must reject the
             // pending order, otherwise the checkout sits idle for another 5s and then
             // reports a second, differently worded timeout.
-            timeoutDuration: 10000,
+            timeoutDuration: 30000,
             timeoutCallback: () => {
                 NMITrace.error('blocks:tokenize:timeout_collectjs', nmiTokenizationTrace());
                 if (typeof window.NMI_Debug !== 'undefined') {
-                    window.NMI_Debug.addSystemInfo('CollectJS Timeout', 'Tokenization did not respond within 10s');
+                    window.NMI_Debug.addSystemInfo('CollectJS Timeout', 'Tokenization did not respond within 30s');
                 }
 
                 // A card tokenization timeout always fires with inSubmission === true,
@@ -824,7 +824,7 @@ const CreditCardForm = ({ billing, eventRegistration, emitResponse }) => {
                     clearTimeout: null 
                 };
 
-                // Backstop only — CollectJS's own 10s timeoutCallback normally rejects
+                // Backstop only — CollectJS's own 30s timeoutCallback normally rejects
                 // first. This catches the case where CollectJS never starts its timer.
                 const timeout = setTimeout(() => {
                     NMITrace.error('blocks:tokenize:timeout_watchdog', nmiTokenizationTrace());
@@ -836,7 +836,7 @@ const CreditCardForm = ({ billing, eventRegistration, emitResponse }) => {
                         });
                         promiseRef.current = null; // Clear ref on timeout
                     }
-                }, 15000); // 15-second timeout
+                }, 35000); // 35-second timeout
 
                 // Store the function to clear the timeout
                 promiseRef.current.clearTimeout = () => clearTimeout(timeout);
@@ -1181,6 +1181,135 @@ const CreditCardForm = ({ billing, eventRegistration, emitResponse }) => {
         
         return unsubscribe;
     }, [onPaymentSetup, fieldValidity, useSavedCard]);
+
+    // Show the shopper why the order failed (for example a declined card).
+    //
+    // When NMI declines a card, PHP throws the friendly decline message and the Store API answers
+    // with a 400 error. WooCommerce files that message under its "cart" notice area, which the
+    // checkout page does not display, so the shopper saw nothing at all. A handler registered here
+    // is the supported way to put the message where the shopper can see it: WooCommerce creates the
+    // notice in the context we name and sets checkout back to idle so the card can be retried.
+    const { onCheckoutFail, onCheckoutAfterProcessingWithError } = eventRegistration;
+    useEffect(() => {
+        const registerFail = onCheckoutFail || onCheckoutAfterProcessingWithError;
+        if (typeof registerFail !== 'function') {
+            return undefined;
+        }
+
+        return registerFail((checkoutResponse) => {
+            const processing = checkoutResponse && checkoutResponse.processingResponse;
+            const message = processing && typeof processing.message === 'string' ? processing.message.trim() : '';
+            if (!message) {
+                return true; // Nothing to add; WooCommerce shows its own fallback.
+            }
+
+            // Already on screen (checkout or payment step)? Then don't show it twice.
+            try {
+                const notices = window.wp.data.select('core/notices');
+                const alreadyShown = ['wc/checkout', 'wc/checkout/payments'].some((context) =>
+                    notices.getNotices(context).some((notice) => notice.status === 'error' && notice.content === message)
+                );
+                if (alreadyShown) {
+                    return true;
+                }
+            } catch (e) {
+                // Notices store unavailable: fall through and show the message.
+            }
+
+            NMITrace.log('blocks:checkout_fail:show_message');
+
+            // Safety net: a theme can hide WooCommerce's notice banner, or something can remove it a moment
+            // later. Check twice that a banner with this text is really VISIBLE (it has a size, is not
+            // display:none / visibility:hidden / transparent); if not, show the message in this payment box
+            // instead. What was found is logged so the cause can be seen in the debug console.
+            const isVisible = (el) => {
+                const rect = el.getBoundingClientRect();
+                const style = window.getComputedStyle(el);
+                return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden' && parseFloat(style.opacity) > 0;
+            };
+            // WooCommerce itself files this failure under its own (cart) notice area, which the checkout also
+            // shows at the top of the page. The copy added above sits in the payment step next to the card
+            // fields, so remove the other one: the shopper must see the message once.
+            const dedupe = () => {
+                try {
+                    const select = window.wp.data.select('core/notices');
+                    const dispatch = window.wp.data.dispatch('core/notices');
+                    const same = (notice) => notice.status === 'error' && typeof notice.content === 'string' && notice.content.trim() === message;
+                    if (!select.getNotices('wc/checkout/payments').some(same)) {
+                        return;
+                    }
+                    select.getNotices('wc/cart').filter(same).forEach((notice) => dispatch.removeNotice(notice.id, 'wc/cart'));
+                } catch (e) {
+                    // Notices store unavailable: leave things as they are.
+                }
+            };
+            const check = (when) => {
+                dedupe();
+                const found =Array.from(document.querySelectorAll('.wc-block-components-notice-banner')).filter(
+                    (el) => el.textContent && el.textContent.indexOf(message) !== -1
+                );
+                // Another plugin or theme stylesheet may hide the banner (display:none !important). Inline
+                // !important styles win over any stylesheet rule, so show the standard WooCommerce banner
+                // again; only if it still cannot be seen does the inline box below take over.
+                let revealed = 0;
+                found.forEach((el) => {
+                    if (isVisible(el)) {
+                        return;
+                    }
+                    const style = window.getComputedStyle(el);
+                    if (style.display === 'none') {
+                        el.style.setProperty('display', 'flex', 'important');
+                    }
+                    if (style.visibility === 'hidden') {
+                        el.style.setProperty('visibility', 'visible', 'important');
+                    }
+                    if (parseFloat(style.opacity) === 0) {
+                        el.style.setProperty('opacity', '1', 'important');
+                    }
+                    revealed++;
+                });
+                const visible = found.filter(isVisible).length;
+                let notices = null;
+                try {
+                    const store = window.wp.data.select('core/notices');
+                    notices = {
+                        payments: store.getNotices('wc/checkout/payments').length,
+                        checkout: store.getNotices('wc/checkout').length,
+                        cart: store.getNotices('wc/cart').length,
+                    };
+                } catch (e) {
+                    // Notices store unavailable; the page check above is enough.
+                }
+                let banner = null;
+                if (found[0]) {
+                    const rect = found[0].getBoundingClientRect();
+                    const style = window.getComputedStyle(found[0]);
+                    banner = {
+                        w: Math.round(rect.width),
+                        h: Math.round(rect.height),
+                        display: style.display,
+                        visibility: style.visibility,
+                        opacity: style.opacity,
+                        top: Math.round(rect.top + window.scrollY),
+                    };
+                }
+                NMITrace.log('blocks:checkout_fail:visible', { when, found: found.length, revealed, visible, notices, banner });
+                if (!visible) {
+                    setError(message);
+                }
+            };
+            window.setTimeout(dedupe, 100);
+            window.setTimeout(() => check('500ms'), 500);
+            window.setTimeout(() => check('2500ms'), 2500);
+
+            return {
+                type: emitResponse.responseTypes.ERROR,
+                message,
+                messageContext: emitResponse.noticeContexts ? emitResponse.noticeContexts.PAYMENTS : 'wc/checkout/payments',
+                retry: true,
+            };
+        });
+    }, [onCheckoutFail, onCheckoutAfterProcessingWithError, emitResponse]);
 
     // Keep Apple Pay / Google Pay in sync with the live cart total.
     //

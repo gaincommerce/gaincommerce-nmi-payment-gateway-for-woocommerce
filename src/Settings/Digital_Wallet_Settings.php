@@ -38,6 +38,7 @@ class Digital_Wallet_Settings
         $fields['digital_wallets_section'] = [
             'title'       => __( 'Digital Wallets', 'gaincommerce-nmi-payment-gateway-for-woocommerce' ),
             'type'        => 'title',
+            'class'       => \APNMIPaymentGateway\Settings\Settings_Style::FREE_CLASS,
             'default'     => '',
             'description' => __(
                 'Enable Apple Pay and Google Pay on the checkout page. Both wallets use your existing NMI public/private keys above. Wallet tokens are already device-authenticated and bypass 3-D Secure.',

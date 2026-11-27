@@ -1,0 +1,14 @@
+{
+  "name": "gaincommerce-nmi-payment-gateway-for-woocommerce",
+  "version": "1.17.0",
+  "description": "Block checkout scripts for the Gain Commerce NMI Payment Gateway for WooCommerce",
+  "license": "GPL-2.0-or-later",
+  "private": true,
+  "scripts": {
+    "build": "wp-scripts build src/blocks/checkout-blocks.js src/blocks/apple-pay-blocks.js src/blocks/google-pay-blocks.js --output-path=assets/js/build"
+  },
+  "devDependencies": {
+    "@woocommerce/dependency-extraction-webpack-plugin": "^3.0.0",
+    "@wordpress/scripts": "^30.0.0"
+  }
+}

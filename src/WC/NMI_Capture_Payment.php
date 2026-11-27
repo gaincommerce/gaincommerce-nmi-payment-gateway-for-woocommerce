@@ -33,7 +33,9 @@ class NMI_Capture_Payment {
             $logger = Logger::get_instance();
 
             $config = [
-                'testmode' => $gateway->testmode,
+                // The API client reads "test_mode"; "testmode" was ignored, so captures were logged as
+                // live even when the store was in Test mode.
+                'test_mode' => (bool) $gateway->testmode,
                 'private_key' => $gateway->private_key,
                 'public_key' => $gateway->public_key
             ];

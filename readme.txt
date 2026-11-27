@@ -3,7 +3,7 @@ Contributors: gaincommerce
 Tags: nmi, woocommerce, payment gateway, credit card, checkout
 Requires at least: 6.8
 Tested up to: 7.1
-Stable tag: 1.16.9
+Stable tag: 1.17.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Requires Plugins: woocommerce
@@ -43,6 +43,17 @@ Upgrade to the **Gain Commerce NMI Premium Add-on** to unlock recurring revenue 
 * **NMI Customer Vault:** Stored payment methods allowing returning customers one-click checkouts.
 * **ACH Electronic Checks:** Direct bank transfer processing alongside credit cards.
 * **3D Secure 2.0 (3DS2):** SCA/PSD2 compliant step-up authentication for liability shift and fraud reduction.
+* **Level 2 & 3 B2B Data:** Send tax, shipping, PO number and line items so business and purchasing cards can qualify for lower processing fees.
+* **Express Checkout:** Apple Pay and Google Pay buttons on product and cart pages.
+* **Soft-Decline Recovery:** Send a webhook after a soft decline so your own email or SMS tool can win the customer back.
+* **Partial Captures:** Capture part of an authorization from the order screen, for split shipments and backorders.
+* **Auto-Void:** Release uncaptured card authorizations automatically.
+* **Settlement Reports:** Match NMI settlement batches to WooCommerce orders, with CSV export.
+
+[Get the Premium add-on](https://www.gaincommerce.com/checkout/nmi/)
+
+### Copyright and License
+Copyright (C) 2026 AP Holdco LLC dba Gain Commerce. Released under the GNU General Public License v2 or later. "Gain Commerce" and the Gain Commerce logo are trademarks of AP Holdco LLC. NMI, WooCommerce, Apple Pay and Google Pay are trademarks of their respective owners, and are used here only to describe compatibility.
 
 == Installation ==
 
@@ -119,12 +130,12 @@ This plugin relies on external third-party services to process payments and prev
 
 = Source Code & Build Instructions =
 
-The source code for minified assets is available in the [Gain Commerce GitHub Repository](https://github.com/gaincommerce/gaincommerce-nmi-payment-gateway-for-woocommerce/).
+The block checkout scripts in `assets/js/build/` are compiled from the readable source in `src/blocks/`. The source code is also available in the [Gain Commerce GitHub Repository](https://github.com/gaincommerce/gaincommerce-nmi-payment-gateway-for-woocommerce/).
 
 Build instructions:
 1. Clone the repository.
-2. Run `npm install` to install dependencies.
-3. Run `npm run build` to generate production assets.
+2. Run `npm install`. This installs the tools listed in `package.json` (WordPress's `@wordpress/scripts` and WooCommerce's dependency-extraction plugin).
+3. Run `npm run build` to regenerate the files in `assets/js/build/` from `src/blocks/`.
 
 == Screenshots ==
 
@@ -140,6 +151,15 @@ Build instructions:
 10. **Detailed Order Notes:** View full NMI transaction responses, including AVS and CVV verification results.
 
 == Changelog ==
+
+= 1.17.0 =
+* Fix the block checkout showing nothing when a card is declined. The shopper now sees the plain-language decline message (for example "Your card was declined. Please try another card.") at the payment step and can correct the card and try again.
+* Redesign the NMI settings screens: every feature now has its own heading and sits in its own off-white card with space around it, so it is easy to see where one feature ends and the next begins. New headings: General, Environment & API Keys, Payment Processing, Bot Protection, Billing Descriptor and Developer Tools, alongside Digital Wallets, Credit Card Surcharge, Decline Messages and Address Autocomplete. No setting was renamed, moved between screens or reset.
+* Fix Apple Pay and Google Pay timing out. The payment now has 30 seconds (it was 10) to complete, which gives shoppers time to approve a payment on their phone, for example by scanning the Apple Pay QR code.
+* Fix the shipping postcode not being sent to NMI with a transaction. The shipping address now includes its postcode, which helps with address checks.
+* Fix captures of authorized payments being logged as live when the store was in Test mode. This only affected the log text, not the money.
+* Add two extension points for the Premium add-on: the `apnmi_payment_declined` action (runs when NMI declines a card) and the `apnmi_bypass_bot_protection` filter (lets a trusted express checkout skip the bot check).
+* Developer: add `package.json` and `webpack.config.js` so the block checkout scripts in `assets/js/build/` can be rebuilt from `src/blocks/`, and correct the build instructions below.
 
 = 1.16.9 =
 * Add optional Address Autocomplete for the billing and shipping address fields on both the block and classic checkout, using your own Google Places API key (Settings > NMI Settings > Address Autocomplete). It is off by default; nothing is loaded and nothing is sent to Google until you enable it and save a key. Suggestions follow the country chosen on the form, filling in street, city/suburb, state and postcode, which helps reduce AVS mismatches. A bad key or any Google error is ignored and checkout keeps working with plain fields. Google usage is billed to your own Google Cloud account.
@@ -271,5 +291,8 @@ Build instructions:
 * Initial release
 
 == Upgrade Notice ==
+= 1.17.0 =
+Block checkout now shows why a card was declined, the shipping postcode is sent to NMI, and the settings screens are organised into clear cards. Recommended for all stores.
+
 = 1.0.0 =
 Initial release of Gain Commerce NMI Payment Gateway for WooCommerce plugin.

@@ -261,6 +261,12 @@ class NMI_Payment_API extends NMI_Base
     {
         $data = [];
 
+        // The order code passes the postcode as "shipping_postcode" (WooCommerce's own name) while NMI's
+        // field is "shipping_zip". Accept both, so the shipping postcode is always sent to NMI.
+        if (empty($shipping_data['shipping_zip']) && !empty($shipping_data['shipping_postcode'])) {
+            $shipping_data['shipping_zip'] = $shipping_data['shipping_postcode'];
+        }
+
         $shipping_fields = [
             'shipping_firstname' => 'shipping_firstname',
             'shipping_lastname' => 'shipping_lastname',

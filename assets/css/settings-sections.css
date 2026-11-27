@@ -1,0 +1,78 @@
+/**
+ * Settings sections: every section on the NMI settings screens is a tinted card.
+ *
+ *   Pro sections  (class "gcnmi-section gcnmi-section--pro")  - green
+ *   Free sections (class "gcnmi-section gcnmi-section--free") - off-white
+ *
+ * WooCommerce prints a section as  <h3 class="wc-settings-sub-title ...">  +  <p> description (optional)
+ * +  <table class="form-table">, so the three neighbouring parts are tinted the same way and read as one card.
+ *
+ * This file is shared by the free plugin and the Enterprise add-on (same file, same handle), so the two look
+ * alike. To change a colour, change the two values (background, accent) of that colour in the rules below.
+ */
+
+/* ---- shape (both colours) ------------------------------------------------ */
+
+.wc-settings-sub-title.gcnmi-section {
+	margin: 28px 0 0;
+	padding: 18px 24px 2px;
+	border-left: 4px solid transparent;
+	border-radius: 6px 6px 0 0;
+	font-size: 16px;
+	line-height: 1.4;
+}
+
+.wc-settings-sub-title.gcnmi-section + p {
+	margin: 0;
+	padding: 4px 24px 8px;
+	border-left: 4px solid transparent;
+}
+
+.wc-settings-sub-title.gcnmi-section + p + table.form-table,
+.wc-settings-sub-title.gcnmi-section + table.form-table {
+	margin: 0 0 4px;
+	padding: 0 24px 14px;
+	border-left: 4px solid transparent;
+	border-radius: 0 0 6px 6px;
+	border-collapse: separate;
+	border-spacing: 0;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* ---- Pro: green ---------------------------------------------------------- */
+
+.gcnmi-section--pro,
+.gcnmi-section--pro + p,
+.gcnmi-section--pro + p + table.form-table,
+.gcnmi-section--pro + table.form-table {
+	background: #edfaef;
+	border-left-color: #00a32a;
+}
+
+/* ---- Free: off-white ----------------------------------------------------- */
+
+.gcnmi-section--free,
+.gcnmi-section--free + p,
+.gcnmi-section--free + p + table.form-table,
+.gcnmi-section--free + table.form-table {
+	background: #fbfbf8;
+	border-left-color: #a7aaad;
+}
+
+/* ---- small screens ------------------------------------------------------- */
+
+@media (max-width: 782px) {
+	.wc-settings-sub-title.gcnmi-section {
+		padding: 14px 14px 2px;
+	}
+
+	.wc-settings-sub-title.gcnmi-section + p {
+		padding: 4px 14px 8px;
+	}
+
+	.wc-settings-sub-title.gcnmi-section + p + table.form-table,
+	.wc-settings-sub-title.gcnmi-section + table.form-table {
+		padding: 0 14px 12px;
+	}
+}

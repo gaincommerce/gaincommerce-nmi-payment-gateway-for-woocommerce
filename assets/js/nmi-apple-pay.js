@@ -72,7 +72,7 @@
                 console.log('NMI Apple Pay: Button rendered.');
                 $container.closest('.nmi-apple-pay-wrap').show();
             },
-            timeoutDuration: 10000,
+            timeoutDuration: 30000,
             timeoutCallback: function () {
                 console.error('NMI Apple Pay: Timeout waiting for button.');
                 $container.closest('.nmi-apple-pay-wrap').hide();

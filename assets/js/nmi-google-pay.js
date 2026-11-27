@@ -64,7 +64,7 @@
                 // CollectJS hides the button automatically if Google Pay is unavailable
                 $container.closest('.nmi-google-pay-wrap').show();
             },
-            timeoutDuration: 10000,
+            timeoutDuration: 30000,
             timeoutCallback: function () {
                 console.error('NMI Google Pay: Timeout waiting for button.');
                 $container.closest('.nmi-google-pay-wrap').hide();

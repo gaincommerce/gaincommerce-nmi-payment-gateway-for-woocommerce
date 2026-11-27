@@ -85,7 +85,7 @@ const ApplePayButton = ( { onClick, onClose } ) => {
                     fieldsAvailableCallback: () => {
                         console.log( 'NMI Apple Pay Blocks: Button rendered.' );
                     },
-                    timeoutDuration: 10000,
+                    timeoutDuration: 30000,
                     timeoutCallback: () => {
                         console.error( 'NMI Apple Pay Blocks: CollectJS timeout.' );
                     },

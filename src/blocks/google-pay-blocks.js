@@ -73,7 +73,7 @@ const GooglePayButton = ( { onClick, onClose } ) => {
                 fieldsAvailableCallback: () => {
                     console.log( 'NMI Google Pay Blocks: Button rendered.' );
                 },
-                timeoutDuration: 10000,
+                timeoutDuration: 30000,
                 timeoutCallback: () => {
                     console.error( 'NMI Google Pay Blocks: CollectJS timeout.' );
                 },

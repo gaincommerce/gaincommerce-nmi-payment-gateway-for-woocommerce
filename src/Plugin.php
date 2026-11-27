@@ -39,6 +39,11 @@ class Plugin
         // Live / Test / Sandbox switcher: admin-bar marker and checkout notice.
         \APNMIPaymentGateway\Settings\Environment::init();
 
+        // Each settings section is a card with its own background, so a feature reads as one block.
+        if ( is_admin() ) {
+            \APNMIPaymentGateway\Settings\Settings_Style::init();
+        }
+
         // Review prompts (milestone notice, settings box, setup-complete card).
         \APNMIPaymentGateway\Review\Review_Prompt::init();
 
